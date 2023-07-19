@@ -1,51 +1,23 @@
-import { useState } from "react";
 import "./App.css";
 import { Movies } from "./components/Movies";
 import responseMovies from "./mocks/with-results.json";
-import { useEffect } from "react";
-import { useRef } from "react";
+import { useSearch } from "./hooks/useSearch";
+import { useState } from "react";
 
 function App() {
-  const movies = responseMovies.Search;
-  const [query, setQuery] = useState([]);
-  const [error, setError] = useState(null);
-  const isFirstInput = useRef(true);
-
-  const mappedMovies = movies.map((movie) => ({
-    id: movie.imdbID,
-    title: movie.Title,
-    year: movie.Year,
-    poster: movie.Poster,
-  }));
+  const { search, updateSearch, error } = useSearch();
+  const [movies, setMovies] = useState([]);
+  
 
   const handleSubmit = (event) => {
-    setQuery(event.target.value);
+    updateSearch(event.target.value);
     event.preventDefault();
   };
 
   const handleChange = (event) => {
-    setQuery(event.target.value);
-    console.log(query);
+    updateSearch(event.target.value);
+    console.log(search);
   };
-
-  useEffect(() => {
-    if (isFirstInput.current) {
-      isFirstInput.current = query === "";
-      return;
-    }
-    
-    if (query === "") {
-      setError("No se puede buscar una película vacía");
-      return;
-    }
-
-    if (query.length < 3) {
-      setError("La búsqueda debe tener al menos 3 caracteres");
-      return;
-    }
-
-    setError(null);
-  }, [query]);
 
   return (
     <div className="page">
@@ -55,7 +27,7 @@ function App() {
           <input
             onChange={handleChange}
             name="query"
-            value={query}
+            value={search}
             placeholder="Avengers, matrix..."
           />
           <button>Search</button>
