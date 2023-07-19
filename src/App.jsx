@@ -6,23 +6,7 @@ import { searchMovies } from "./services/movies";
 
 function App() {
   const { search, updateSearch } = useSearch();
-  const [movies, setMovies] = useState(search);
-  const previousSearch = useRef(search);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const getMovies = useCallback(async ({ search }) => {
-    if (search === previousSearch.current) return;
-    try {
-      previousSearch.current = search;
-      const newMovies = await searchMovies({ search });
-      setMovies(newMovies);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  
 
   const handleSubmit = (event) => {
     event.preventDefault();
