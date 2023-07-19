@@ -1,22 +1,37 @@
 import "./App.css";
 import { Movies } from "./components/Movies";
-import responseMovies from "./mocks/with-results.json";
 import { useSearch } from "./hooks/useSearch";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { searchMovies } from "./services/movies";
 
 function App() {
-  const { search, updateSearch, error } = useSearch();
-  const [movies, setMovies] = useState([]);
-  
+  const { search, updateSearch } = useSearch();
+  const [movies, setMovies] = useState(search);
+  const previousSearch = useRef(search);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const getMovies = useCallback(async ({ search }) => {
+    if (search === previousSearch.current) return;
+    try {
+      previousSearch.current = search;
+      const newMovies = await searchMovies({ search });
+      setMovies(newMovies);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const handleSubmit = (event) => {
-    updateSearch(event.target.value);
     event.preventDefault();
+    getMovies({ search });
   };
 
   const handleChange = (event) => {
-    updateSearch(event.target.value);
-    console.log(search);
+    const newSearch = event.target.value;
+    updateSearch(newSearch);
   };
 
   return (
@@ -35,9 +50,7 @@ function App() {
         {error && <p style={{ color: "red" }}>{error}</p>}
       </header>
 
-      <main>
-        <Movies movies={mappedMovies} />
-      </main>
+      <main>{loading ? <p>Loading...</p> : <Movies movies={movies} />}</main>
     </div>
   );
 }
